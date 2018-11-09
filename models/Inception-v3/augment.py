@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 bs=8
 
 train_datagen = ImageDataGenerator(
-        rescale=1./255,
         zoom_range=0.2,
         vertical_flip=True,
         horizontal_flip=True,
