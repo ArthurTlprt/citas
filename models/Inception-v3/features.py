@@ -7,21 +7,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
 
+type = 'fluorescent/'
+
 base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=(192, 256, 3))
 
 train_datagen = ImageDataGenerator(rescale=1./255)
 
 # sets = ['train', 'test']
 # paths = {'train': '../../augmented_x/', 'test': '../../dataset/balanced/test/'}
-labels = ['clean', 'infected']
+labels = ['clean', 'tr4']
 
 
 #for s in sets:
 for l in labels:
-    bs = len(glob('../../augmented_2/'+l+'/*'))
+    bs = len(glob('../../augmented_3/'+type+l+'/*'))
 
     train_generator = train_datagen.flow_from_directory(
-    '../../augmented_2/'+l,
+    '../../augmented_3/'+type+l,
     target_size=(192, 256),
     batch_size=bs,
     class_mode='categorical')
@@ -29,6 +31,5 @@ for l in labels:
     # extract features
     f = base_model.predict_generator(train_generator)
 
-
-    np.save('features/f_{}_3.npy'.format(l), f)
+    np.save('features/dataset_3/{}f_{}.npy'.format(type, l), f)
     print("saved")
