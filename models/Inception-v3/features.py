@@ -6,30 +6,45 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 from glob import glob
+from multiprocessing import Pool
 
-type = 'fluorescent/'
+im_types = ['brightfield', 'darkfield', 'fluorescent']
 
 base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=(192, 256, 3))
 
 train_datagen = ImageDataGenerator(rescale=1./255)
 
-# sets = ['train', 'test']
-# paths = {'train': '../../augmented_x/', 'test': '../../dataset/balanced/test/'}
 labels = ['clean', 'tr4']
+bs = 50
 
+#dataset/box_1/test/brightfield
+def feature_im_type(im_type):
+	for l in labels:
+		print(glob('../../dataset/box_1/test/'+im_type+'/'+l))
+		train_generator = train_datagen.flow_from_directory(
+		'../../augmented_box_1/'+im_type+'/'+l,
+		target_size=(192, 256),
+		batch_size=bs,
+		class_mode='categorical')
 
-#for s in sets:
-for l in labels:
-    bs = len(glob('../../augmented_3/'+type+l+'/*'))
+		# extract features
+		f = base_model.predict_generator(train_generator) 
+		print(f.shape)
+		np.save('features/dataset_box_1/{}/f_{}.npy'.format(im_type, l), f)
 
-    train_generator = train_datagen.flow_from_directory(
-    '../../augmented_3/'+type+l,
-    target_size=(192, 256),
-    batch_size=bs,
-    class_mode='categorical')
+		train_generator = train_datagen.flow_from_directory(
+		'../../dataset/box_1/test/'+im_type+'/'+l,
+		target_size=(192, 256),
+		batch_size=len(glob('../../dataset/box_1/test/'+im_type+'/'+l+'/1/*.jpg')),
+		class_mode='categorical')
+		# extract features
+		f = base_model.predict_generator(train_generator)
+		print(f.shape)
+		np.save('features/dataset_box_1/{}/ftest_{}.npy'.format(im_type, l), f)
+		print("saved")
 
-    # extract features
-    f = base_model.predict_generator(train_generator)
+#p = Pool(8)
+#p.map(feature_im_type, im_types)
 
-    np.save('features/dataset_3/{}f_{}.npy'.format(type, l), f)
-    print("saved")
+for im_type in im_types:
+	feature_im_type(im_type)
