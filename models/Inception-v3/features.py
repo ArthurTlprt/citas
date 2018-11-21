@@ -28,7 +28,7 @@ def feature_im_type(im_type):
 		class_mode='categorical')
 
 		# extract features
-		f = base_model.predict_generator(train_generator) 
+		f = base_model.predict_generator(train_generator)
 		print(f.shape)
 		np.save('features/dataset_box_1/{}/f_{}.npy'.format(im_type, l), f)
 
@@ -43,8 +43,11 @@ def feature_im_type(im_type):
 		np.save('features/dataset_box_1/{}/ftest_{}.npy'.format(im_type, l), f)
 		print("saved")
 
-#p = Pool(8)
-#p.map(feature_im_type, im_types)
 
-for im_type in im_types:
-	feature_im_type(im_type)
+if __name__ == '__main__':
+	#p = Pool(8)
+	#p.map(feature_im_type, im_types)
+
+	# for im_type in im_types:
+	# 	feature_im_type(im_type)
+	feature_im_type('fluo_brighter')
