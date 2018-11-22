@@ -45,7 +45,11 @@ def mix_types(path):
 		train_thres += i_train
 		x_test[test_thres:test_thres+i_test] = x_l_test[i]
 		y_test[test_thres:test_thres+i_test] = y_l_test[i]
-		test_thres = i_test
+		test_thres += i_test
+	indexes = np.arange(x_train.shape[0])
+	np.random.shuffle(indexes)
+	x_train = x_train[indexes]
+	y_train = y_train[indexes]
 
 	return x_train, y_train, x_test, y_test
 
@@ -77,11 +81,11 @@ def shuffle_classes(path_clean, path_infected, path_test_clean, path_test_tr4):
 	# then create the arrays to store the features and the labels
 	x_test = np.zeros((ftest_clean.shape[0]+ftest_tr4.shape[0], ftest_clean.shape[1], ftest_clean.shape[2], ftest_clean.shape[3]))
 	x_test[:ftest_clean.shape[0]] = ftest_clean
+	print("clean test: {}".format(ftest_clean.shape[0]))
 	x_test[ftest_clean.shape[0]:] = ftest_tr4
 	y_test = np.zeros(ftest_clean.shape[0]+ftest_tr4.shape[0])
 	y_test[ftest_clean.shape[0]:] = 1.
 	y_test = to_categorical(y_test, num_classes=2)
-
 	return x_train, y_train, x_test, y_test
 
 def get_model():
@@ -89,10 +93,9 @@ def get_model():
 	model.add(GlobalAveragePooling2D(input_shape=f_shape))
 	# Then output the 2 probabilities
 	model.add(Dense(512, activation='relu'))
-	model.add(Dropout(0.5))
 	model.add(Dense(2, activation='softmax'))
 	# the learning rate is low because the model is little
-	adam = Adam(lr=0.0001)
+	adam = Adam(lr=0.001)
 	model.compile(loss="categorical_crossentropy", optimizer=adam, metrics=['acc'])
 	return model
 
@@ -101,7 +104,7 @@ def train_on_features(f_path, snapshot_name):
 	x_train, y_train, x_test, y_test = mix_types(f_path)
 	model = get_model()
 	check = ModelCheckpoint('snapshots/'+snapshot_name+'.h5', monitor='val_acc', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
-	hist = model.fit(x_train, y_train, epochs=100, batch_size=32, validation_data=(x_test, y_test), callbacks=[check])
+	hist = model.fit(x_train, y_train, epochs=300, batch_size=32, validation_data=(x_test, y_test), callbacks=[check])
 
 	y_pred = model.predict(x_test)
 
