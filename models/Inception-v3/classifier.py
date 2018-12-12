@@ -10,6 +10,7 @@ f_shape = (4, 6, 2048)
 
 types = ['brightfield/', 'darkfield/', 'fluo_brighter/']
 
+
 def mix_types(path):
 	x_l_train, y_l_train, x_l_test, y_l_test = ([] for i in range(4))
 	# getting all the type

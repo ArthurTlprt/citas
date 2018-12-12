@@ -6,10 +6,9 @@ from glob import glob
 from skimage.io import imread
 from skimage.transform import resize
 
-h5_path = 'brightfield.h5'
 folder_path = 'dataset/'
 
-def predict_from_directory(folder_path):
+def predict_from_directory(folder_path, h5_path):
     images_path = glob(folder_path+'clean/*')
     images_path += glob(folder_path+'infected/*')
     base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=(192, 256, 3))
@@ -25,7 +24,7 @@ def predict_from_directory(folder_path):
     y_pred = classifier.predict(f_test)
     return images_path, y_pred
 
-def predict(x):
+def predict(x, h5_path):
     if len(x.shape) == 3:
         x = x.reshape((1, x.shape[0], x.shape[1], x.shape[2]))
     base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=(192, 256, 3))
